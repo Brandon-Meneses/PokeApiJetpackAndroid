@@ -168,22 +168,6 @@ fun SearchScreen(navController: NavHostController, viewModel: PokemonListViewMod
             ) {
                 Button(
                     onClick = {
-                        if (pokemonName.isNotEmpty()) {
-                            navController.navigate("details/$pokemonName")
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1E88E5)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .padding(horizontal = 8.dp)
-                ) {
-                    Text("Search", color = Color.White)
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = {
                         navController.navigate("pokemonList")
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF43A047)),

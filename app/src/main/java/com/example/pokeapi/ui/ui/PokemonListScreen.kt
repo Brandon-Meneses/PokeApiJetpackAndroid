@@ -3,6 +3,7 @@ package com.example.pokeapi.ui.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -67,6 +68,9 @@ fun PokemonListScreen(navController: NavHostController, viewModel: PokemonListVi
                             .padding(16.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .border(2.dp, Color.Gray, RoundedCornerShape(8.dp))
+                            .clickable {
+                                navController.navigate("details/${pokemon.name}")
+                            }
                     ) {
                         Image(
                             painter = rememberImagePainter(imageUrl),

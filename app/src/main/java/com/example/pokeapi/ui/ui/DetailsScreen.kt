@@ -72,11 +72,11 @@ fun DetailsScreen(navController: NavController, pokemonName: String, viewModel: 
                     contentScale = ContentScale.Crop
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Name: ${it.name}", style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center)
+                Text("Name: ${it.name.capitalize()}", style = MaterialTheme.typography.headlineLarge, textAlign = TextAlign.Center)
                 Text("ID: ${it.id}", style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
                 Text("Height: ${it.height}", style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
                 Text("Weight: ${it.weight}", style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-                Text("Types: ${it.types.joinToString { type -> type.type.name }}", style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+                Text("Types: ${it.types.joinToString { type -> type.type.name.capitalize() }}", style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             }
         }
     } ?: run {
