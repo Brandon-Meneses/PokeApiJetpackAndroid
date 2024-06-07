@@ -7,15 +7,17 @@ import androidx.navigation.compose.composable
 import com.example.pokeapi.ui.ui.DetailsScreen
 import com.example.pokeapi.ui.ui.PokemonListScreen
 import com.example.pokeapi.ui.ui.SearchScreen
+import com.example.pokeapi.viewModel.PokemonListViewModel
 import com.example.pokeapi.viewModel.PokemonViewModel
 
 @Composable
 fun PokeApp() {
     val navController = rememberNavController()
     val viewModel = PokemonViewModel()
+    val listViewModel = PokemonListViewModel()
     NavHost(navController, startDestination = "search") {
         composable("search") {
-            SearchScreen(navController)
+            SearchScreen(navController,listViewModel)
         }
         composable("details/{pokemonName}") { backStackEntry ->
             val pokemonName = backStackEntry.arguments?.getString("pokemonName") ?: ""

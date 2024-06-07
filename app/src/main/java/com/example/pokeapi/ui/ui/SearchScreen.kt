@@ -3,7 +3,10 @@ package com.example.pokeapi.ui.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,10 +35,25 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberImagePainter
 import com.example.pokeapi.R
+import com.example.pokeapi.model.PokemonListItem
+import com.example.pokeapi.viewModel.PokemonListViewModel
+import kotlin.math.min
 
 @Composable
-fun SearchScreen(navController: NavHostController) {
+fun SearchScreen(navController: NavHostController, viewModel: PokemonListViewModel) {
     var pokemonName by remember { mutableStateOf("") }
+    var suggestions by remember { mutableStateOf(emptyList<PokemonListItem>()) }
+
+    LaunchedEffect(pokemonName) {
+        if (pokemonName.isNotEmpty()) {
+            suggestions = viewModel.pokemonList.filter {
+                it.name.contains(pokemonName, ignoreCase = true) ||
+                        levenshtein(it.name, pokemonName) <= 3 // Ajusta el valor según la tolerancia
+            }
+        } else {
+            suggestions = emptyList()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -43,7 +61,6 @@ fun SearchScreen(navController: NavHostController) {
             .background(Color(0xFFB71C1C))
             .padding(16.dp)
     ) {
-        // Pokédex Container
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,7 +102,7 @@ fun SearchScreen(navController: NavHostController) {
                     .padding(16.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Color.Black)
-                    .height(220.dp)  // Ajuste de altura
+                    .height(220.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -93,7 +110,7 @@ fun SearchScreen(navController: NavHostController) {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
-                        text = "Ingrese nombre de Pokémon:",
+                        text = "Enter Pokémon Name",
                         color = Color.White,
                         fontSize = 18.sp,
                         modifier = Modifier.padding(8.dp)
@@ -107,6 +124,38 @@ fun SearchScreen(navController: NavHostController) {
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White)
                     )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(suggestions) { suggestion ->
+                    val id = suggestion.url.split("/").filter { it.isNotEmpty() }.last()
+                    val imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/$id.png"
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color.LightGray)
+                            .padding(16.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                pokemonName = suggestion.name
+                                navController.navigate("details/${suggestion.name}")
+                            }
+                    ) {
+                        Image(
+                            painter = rememberImagePainter(imageUrl),
+                            contentDescription = "Image of ${suggestion.name}",
+                            modifier = Modifier.size(64.dp)
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text("${suggestion.name.capitalize()} (#$id)", fontWeight = FontWeight.Bold)
+                    }
                 }
             }
 
@@ -130,7 +179,7 @@ fun SearchScreen(navController: NavHostController) {
                         .clip(RoundedCornerShape(8.dp))
                         .padding(horizontal = 8.dp)
                 ) {
-                    Text("Buscar", color = Color.White)
+                    Text("Search", color = Color.White)
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
@@ -198,4 +247,33 @@ fun SearchScreen(navController: NavHostController) {
             }
         }
     }
+}
+
+// Function to calculate Levenshtein distance
+fun levenshtein(lhs: CharSequence, rhs: CharSequence): Int {
+    val lhsLength = lhs.length
+    val rhsLength = rhs.length
+
+    var cost = Array(lhsLength + 1) { it }
+    var newCost = Array(lhsLength + 1) { 0 }
+
+    for (i in 1..rhsLength) {
+        newCost[0] = i
+
+        for (j in 1..lhsLength) {
+            val match = if (lhs[j - 1] == rhs[i - 1]) 0 else 1
+
+            val costReplace = cost[j - 1] + match
+            val costInsert = cost[j] + 1
+            val costDelete = newCost[j - 1] + 1
+
+            newCost[j] = min(min(costInsert, costDelete), costReplace)
+        }
+
+        val swap = cost
+        cost = newCost
+        newCost = swap
+    }
+
+    return cost[lhsLength]
 }
